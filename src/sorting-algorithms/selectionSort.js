@@ -1,5 +1,5 @@
-const swap = require('../utils').swap;
-const deepCopyArray = require('../utils').deepCopyArray;
+import { swap } from '../utils';
+import { deepCopyArray } from '../utils';
 
 function selectionSort(array) {
     let states = [];
@@ -34,4 +34,5 @@ function selectionSort(array) {
 
 
 
-module.exports.selectionSort = selectionSort;
+const _selectionSort = selectionSort;
+export { _selectionSort as selectionSort };
