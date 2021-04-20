@@ -30,11 +30,6 @@ export function colorNodes(selector, color){
     .forEach((node) => node.style.backgroundColor = color);
 }
 
-export function colorPastBars(toIndex, color){
-    for (let i=0; i <= toIndex; i++)
-        colorNodes(`#array-bar-${i}`, color);
-}
-
 export function colorBars(array) {  // array[i] tells the color if the ith bar
     for (let i=0; i< array.length; i++)
         colorNodes(`#array-bar-${i}`, array[i]);

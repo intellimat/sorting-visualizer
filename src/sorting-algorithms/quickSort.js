@@ -5,7 +5,8 @@ const TYPE = {
     TARGET: 'brown',
     SELECTED: 'darkyellow',
     AVG: 'brown',
-    FINAL: 'rgba(28, 129, 21, 0.678)'
+    FINAL: 'rgba(28, 129, 21, 0.678)',
+    PIVOT: '#006699'
 };
 
 export function quickSort(array) {
@@ -28,7 +29,7 @@ function quickSort_recursive(array, left, right, history, finals) {
 
         quickSort_recursive(array, left, m1, history, finals);
         quickSort_recursive(array, m2, right, history, finals);
-    } else if (left === right){
+    } else if (left === right){ // array already sorted, add new elements in their final position
         let newFinal = {
             index: left,
             type: TYPE.FINAL
@@ -41,45 +42,37 @@ function quickSort_recursive(array, left, right, history, finals) {
 
 function partition(array, left, right, history, finals) {
     let pivot = array[right];
-    let pivotIndex = right;
+
+    // show the pivot
+    let animations = newAnimationsArray([{index: right, type: TYPE.PIVOT}], array.length, finals);
+    history.push(newFrame(array, animations));
 
     let i = left;
     let k = right;
     let j = left;
 
     while (j <= k) {
-        let animatedElements = [{index: j, type: TYPE.CHECKED}, {index: pivotIndex, type: TYPE.TARGET}];
-        let animations = newAnimationsArray(animatedElements, array.length, finals);
+        // show the current element that is being compared to the pivot
+        animations = newAnimationsArray([{index: j, type: TYPE.CHECKED}], array.length, finals);
         history.push(newFrame(array, animations));
 
         if (array[j] < pivot){
-            animatedElements = [{index: j, type: TYPE.SELECTED}, {index: pivotIndex, type: TYPE.TARGET}];
-            animations = newAnimationsArray(animatedElements, array.length, finals);
-            history.push(newFrame(array, animations));
-
             swap(array, i, j);
-
-            animations = newAnimationsArray([],array.length, finals);
-            history.push(newFrame(array, animations));
-
             i++;
             j++;
         } else if (array[j] > pivot) {
-            animatedElements = [{index: j, type: TYPE.CHECKED}, {index: pivotIndex, type: TYPE.SELECTED}];
-            animations = newAnimationsArray(animatedElements, array.length, finals);
-            history.push(newFrame(array, animations));
-
             swap(array, j, k);
-
-            animations = newAnimationsArray([],array.length, finals);
-            history.push(newFrame(array, animations));
-
             k--;
         } else {
             j++;
         }
+
+        // show the new array state after comparing the element in index j with the pivot
+        animations = newAnimationsArray([],array.length, finals);
+        history.push(newFrame(array, animations));
     }
 
+    // update the list of the elements in their final positions (i.e. the pivot and all the element equal to the pivot)
     for (let index=i; index <= k; index++){
         let newFinal = {
             index: index,
@@ -88,7 +81,8 @@ function partition(array, left, right, history, finals) {
         finals.push(newFinal);
     }
 
-    let animations = newAnimationsArray([],array.length, finals);
+    // show the new array state (with the new elements in their final position)
+    animations = newAnimationsArray([],array.length, finals);
     history.push(newFrame(array,animations));    
 
     let indeces = {

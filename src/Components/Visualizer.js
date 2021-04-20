@@ -1,11 +1,14 @@
 import React                from "react";
 import { heapSort }         from "../sorting-algorithms/heapSort";
-import { getRandomInteger, deepCopyArray, sleep, colorNodes, colorPastBars, colorBars } from "../utils";
+import { getRandomInteger, deepCopyArray, sleep, colorNodes, colorBars } from "../utils";
 import { mergeSort }        from "../sorting-algorithms/mergeSort";
 import { quickSort }        from "../sorting-algorithms/quickSort";
 import { selectionSort }    from "../sorting-algorithms/selectionSort";
 
-const SPEED_CONSTANT = 3000;     // lower is faster
+const SPEED_CONSTANT = 1000;     // lower means faster animations
+const MAX_ARRAY_SIZE = 200;
+const MIN_ARRAY_SIZE = 5;
+const SIZE_INCREMENT = 15;
 
 const colors = {
     SORTED_COLOR: 'rgba(28, 129, 21, 0.678)',
@@ -27,100 +30,17 @@ class Visualizer extends React.Component {
         super(props);
         this.state = {
             array: [],
-            arraySize: 80,
+            arraySize: 30,
             usedSortingAlgorithm: null
         };
     }
 
     componentDidMount = () => {
         this.resetArray();
-
-        let inputSizeElement = document.getElementById('array-size');
-        inputSizeElement.addEventListener('change', (event) => {
-            let newArraySize = event.target.value;
-            console.log('new array size: ' + newArraySize);
-            this.setState({arraySize: newArraySize}, () => this.resetArray());
-        });
-    }
-
-    // show selectionsort animations
-    showSelectionSort = async (history) => {
-        for (const [index, animations_i] of history.animations.entries()) {
-            let lastMinIndex = null;
-            if (index > 0)
-                colorPastBars(index-1, colors.SORTED_COLOR);
-
-            for (const [j, barToColor] of animations_i.entries()) {
-                if (lastMinIndex != null)
-                    colorNodes(`#array-bar-${lastMinIndex}`, colors.MIN_INDEX_COLOR);
-
-                await sleep(SPEED_CONSTANT/this.state.arraySize);
-
-                if ( j > 0 && barToColor.index !== lastMinIndex )
-                    colorNodes(`#array-bar-${animations_i[j-1].index}`, colors.DEFAULT_UNSORTED); // uncolor the previous one
-
-                colorNodes(`#array-bar-${barToColor.index}`, colors.ACTIVE_COLOR);
-                
-                if (barToColor.min && lastMinIndex != null) {
-                    colorNodes(`#array-bar-${lastMinIndex}`, colors.DEFAULT_UNSORTED);     // uncolor the previous one
-                    colorNodes(`#array-bar-${barToColor.index}`, colors.MIN_INDEX_COLOR);
-                    lastMinIndex = barToColor.index;
-
-                } else if (barToColor.min && lastMinIndex == null){
-                    colorNodes(`#array-bar-${barToColor.index}`, colors.MIN_INDEX_COLOR);
-                    lastMinIndex = barToColor.index;
-                }
-
-                if (barToColor.index === this.state.arraySize - 1)
-                    await sleep(SPEED_CONSTANT/this.state.arraySize); // slow down to see the last bar colored
-            }
-
-            this.setState({array: history.states[index]}, () => this.disableButtons());  // then update array
-        }
-
-        // array sorted shown
-        this.setState({usedSortingAlgorithm: 'selectionsort'});
-        colorNodes('.array-bar', colors.SORTED_COLOR);  // color again
-    }
-
-    // show mergesort animations
-    showMergeSort = async (history) => {
-        for (const frame of history){
-            await sleep(SPEED_CONSTANT/this.state.arraySize);
-            this.setState({array: frame.values}, () => {colorBars(frame.animations); this.disableButtons();});
-        }
-            
-        // array sorted shown
-        this.setState({usedSortingAlgorithm: 'mergesort'});
-        colorNodes('.array-bar', colors.SORTED_COLOR);
-    }
-
-    // show heapsort animations
-    showHeapSort = async (history) => {
-        for (const frame of history){
-            await sleep(SPEED_CONSTANT/this.state.arraySize);
-            this.setState({array: frame.values}, () => {colorBars(frame.animations); this.disableButtons();});
-        }
-
-        // array sorted shown
-        this.setState({usedSortingAlgorithm: 'heapsort'});
-        colorNodes('.array-bar', colors.SORTED_COLOR);
-    }
-
-    // show quicksort animations
-    showQuickSort = async (history) => {
-        for (const frame of history){
-            await sleep(SPEED_CONSTANT/this.state.arraySize);
-            this.setState({array: frame.values}, () => {colorBars(frame.animations); this.disableButtons();});
-        }    
-
-        // array sorted shown
-        this.setState({usedSortingAlgorithm: 'quicksort'});
-        colorNodes('.array-bar', colors.SORTED_COLOR);
     }
 
     // create a new random array
-    resetArray = () => {
+    resetArray = (callback) => {
         let newArraySize = this.state.arraySize;
         let newArray = [];
         for (let i=0; i < newArraySize; i++) {
@@ -128,60 +48,89 @@ class Visualizer extends React.Component {
             newArray.push(value);
         }
 
-        this.setState({array: newArray, arraySize: newArray.length, usedSortingAlgorithm: null});
+        if (callback)
+            this.setState({array: newArray, arraySize: newArray.length, usedSortingAlgorithm: null}, callback);
+        else this.setState({array: newArray, arraySize: newArray.length, usedSortingAlgorithm: null});
     }
 
-    disableButtons = () => {
-        let buttons = document.querySelectorAll('.sort-button, .reset-button');
-        for (const button of buttons) 
-            button.setAttribute('disabled', true);
+    setDisableProperty = (selector) => {
+        let nodes = document.querySelectorAll(selector);
+        for (const node of nodes) 
+            node.setAttribute('disabled', true);
     }
 
     // sort the current array (stored in the state) by using the algorithm passed by parameter
     sort = (algorithm) => {
-        this.setState({usedSortingAlgorithm: null}, () => this.disableButtons());
+        this.setState({usedSortingAlgorithm: null}, () => this.setDisableProperty('.sort-button, .reset-button, .size-button'));
 
         algorithm = algorithm.trim().toLowerCase();
 
-        let viewers = {
-            mergesort: this.showMergeSort,
-            quicksort: this.showQuickSort,
-            heapsort: this.showHeapSort,
-            selectionsort: this.showSelectionSort
-        };
-
         let array = deepCopyArray(this.state.array);
 
-        let history;
-
         if (algorithm in algorithms){
-            history = algorithms[algorithm](array);
-            viewers[algorithm](history);
+            let history = algorithms[algorithm](array);
+            this.showSorting(history, algorithm);
         } else alert(`The selected algorithm '${algorithm}' does not exists.`);
     }
 
+    // show sorting animations
+    showSorting = async (history, algorithm) => {
+        for (const frame of history){
+            await sleep(SPEED_CONSTANT/this.state.arraySize);
+            this.setState({array: frame.values}, () => {colorBars(frame.animations); this.setDisableProperty('button');});
+        }    
+
+        // array sorted shown
+        this.setState({usedSortingAlgorithm: algorithm}, () => colorNodes('.array-bar', colors.SORTED_COLOR));
+    }
+
     handleSizeChange = (event) => {
-        let newArraySize = parseInt(event.target.value);
-        this.setState({arraySize: newArraySize}, this.resetArray());
+        let currentArraySize = this.state.arraySize;
+        let newArraySize;
+
+        // Compute new size
+        if (event.target.name === 'minus-button')
+            newArraySize = Math.max(MIN_ARRAY_SIZE, currentArraySize - SIZE_INCREMENT);
+        else if (event.target.name === 'plus-button')
+            newArraySize = Math.min(MAX_ARRAY_SIZE, currentArraySize + SIZE_INCREMENT);
+
+        if (newArraySize === MAX_ARRAY_SIZE){
+            this.setState({arraySize: newArraySize}, () => {
+                this.resetArray(() => this.setDisableProperty('button.plus-size-button'));
+            });
+            
+        } else if (newArraySize === MIN_ARRAY_SIZE){
+            this.setState({arraySize: newArraySize}, () => {
+                this.resetArray(() => this.setDisableProperty('button.minus-size-button'));
+            });
+            
+        } else this.setState({arraySize: newArraySize}, () => this.resetArray());
+
     }
 
     render = () => {
         let Header = () => {
-            return (
-                <div id='header'>
-                <h3 id='headline'> Sorting Visualizer </h3>
-                <div id='buttons-container'>
-                <button className='custom-button sort-button'    onClick={() => this.sort('selectionsort')}> Selection Sort </button>
-                <button className='custom-button sort-button'    onClick={() => this.sort('quicksort')}> Quick Sort </button>
-                <button className='custom-button sort-button'    onClick={() => this.sort('mergesort')}> Merge Sort </button>
-                <button className='custom-button sort-button'    onClick={() => this.sort('heapsort')}> Heap Sort </button>
+            return (<>
+                <h1 id='headline'> Sorting Visualizer </h1>
+
+                <div id='wrapper'>
+                <div id='sort-buttons-container'>
+                <button className='custom-button sort-button'    onClick={() => this.sort('selectionsort')}> SelectionSort </button>
+                <button className='custom-button sort-button'    onClick={() => this.sort('quicksort')}> QuickSort </button>
+                <button className='custom-button sort-button'    onClick={() => this.sort('mergesort')}> MergeSort </button>
+                <button className='custom-button sort-button'    onClick={() => this.sort('heapsort')}> HeapSort </button>
+                </div>
+
+                <div id='array-changer-container'>
+                <div id='size-changer-container'>              
+                <button className='custom-button size-button minus-size-button' name='minus-button' onClick={this.handleSizeChange}> - </button>
+                <label htmlFor="array-size" id="array-size">Array size</label>
+                <button className='custom-button size-button plus-size-button' name='plus-button' onClick={this.handleSizeChange}> + </button>
+                </div>
                 <button className='custom-button reset-button'   onClick={() => this.resetArray()}> Generate New Array </button>
-                <div>
-                <label htmlFor="array-size">Array size (5-200):</label>
-                <input type="range" id="array-size" min="5" max="200" name="array-size"></input>
                 </div>
                 </div>
-                </div>
+                </>
             );
         }
 

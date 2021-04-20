@@ -3,6 +3,7 @@
 html {
     /* custom colors */
     --dark-orange: rgb(179, 86, 11);
+    --very-dark-orange: rgb(160, 80, 15);
     --light-orange: rgba(185, 127, 80, 0.568);
     --light-grey: rgba(123, 175, 158, 0.486);
     --dark-grey: rgb(57, 82, 74);
@@ -21,27 +22,39 @@ html, body {
 }
 
 
-div#header {    /* top bar */
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+h1#headline { /* Title (Sorting Visualizer) */
+    text-align: center;
     background-color: var(--light-grey);
-    padding: 1px 0;
+    margin: 0 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
-h3#headline { /* Title (Sorting Visualizer) */
+div#sort-buttons-container {
+    margin: 10px 0;
     display: flex;
-    align-items: center;
-    margin-left: 10px;
-    margin-right: 20px;
-    border-right: 2px solid whitesmoke;
-    padding-right: 20px;
-}
-
-div#buttons-container {
-    display: flex;
-    align-items: center;
     flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+
+div#array-changer-container{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+div#size-changer-container {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+div#wrapper {
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
 }
 
 #visualizer-container {
@@ -74,7 +87,7 @@ div#sorting-info {
 /* Buttons */
 
 .custom-button {
-    margin: 2px 10px;
+    margin: 2px 8px;
     border-radius: 5px;
     font-size: 16px;
     border: none;
@@ -97,29 +110,47 @@ div#sorting-info {
     background-color: var(--dark-orange);
     color: white;
 }
-
+/*
 .sort-button:hover:enabled, .sort-button:focus:enabled {
-    border: 1px solid var(--dark-orange);
-    color: var(--dark-orange);
-    background-color: whitesmoke;
+    
 }
 
 .reset-button:hover:enabled, .reset-button:focus:enabled {
-    border: 1px solid var(--dark-grey);
-    background-color: whitesmoke;
-    color: var(--dark-grey);
+
 }
+*/
 
 .reset-button {
     background-color: var(--dark-grey);
     color: white;
-    margin-left: 20px;
-    margin-right: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .custom-button:active:enabled {
     box-shadow: 0 0 15px var(--dark-grey);
 }
+
+.size-button {
+    width: 40px;
+    height: 30px;
+}
+
+.size-button:disabled {
+    background-color: lightgrey;
+    color: darkgrey;
+}
+
+.minus-size-button {
+    background-color: rgba(179, 0, 0, 0.753);
+    color: white;
+}
+
+.plus-size-button {
+    background-color: rgba(12, 109, 44, 0.705);
+    color: white;;
+}
+
 
 @media only screen and (max-width: 768px) {
     div#visualizer-container {
@@ -130,4 +161,4 @@ div#sorting-info {
     div#sorting-info {
         left: 20px;
     }
-  }
+}

@@ -1,38 +1,48 @@
-import { swap } from '../utils';
-import { deepCopyArray } from '../utils';
+import { swap, newFrame, newAnimationsArray } from '../utils';
+
+const TYPE = {
+    CHECKED: 'brown',
+    TARGET: 'brown',
+    SELECTED: 'darkyellow',
+    MIN: '#006699', //blueish
+    FINAL: 'rgba(28, 129, 21, 0.678)',
+};
+
 
 function selectionSort(array) {
-    let states = [];
-    let animations = [];
+    let history = [];
+    let animations;
+    let finals = [];
+
     for (let i=0; i < array.length; i++){
-        let animations_i = [];  // we save every currennt minIndex
         let minIndex = i;
-        animations_i.push({index: minIndex, min: true});
+
         for (let j=i; j < array.length; j++){
+            animations = newAnimationsArray([{index: minIndex, type: TYPE.MIN}, {index: j, type: TYPE.TARGET}], array.length, finals);
+            history.push(newFrame(array,animations));
+
             if (array[j] < array[minIndex]){
                 minIndex = j;
-                animations_i.push({index: minIndex, min: true});
-             } else animations_i.push({index: j, min: false});
+            } 
+
+            animations = newAnimationsArray([{index: minIndex, type: TYPE.MIN}], array.length, finals);
+            history.push(newFrame(array, animations));
         }
         
-        animations.push(animations_i);
-        
         swap(array, i, minIndex);
-        // new array state ready
-        let state = deepCopyArray(array);
-        states.push(state);
-    }
+        
+        let newFinal = {
+            index: i,
+            type: TYPE.FINAL
+        };
 
-    let history = {
-        states: states,
-        animations: animations
-    };
+        finals.push(newFinal);
+        animations = newAnimationsArray([{index: i, type: TYPE.FINAL}], array.length, finals);
+        history.push(newFrame(array, animations));
+    }
 
     return history;
 }
 
 
-
-
-const _selectionSort = selectionSort;
-export { _selectionSort as selectionSort };
+export { selectionSort };
