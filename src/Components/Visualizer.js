@@ -1,9 +1,16 @@
-import React                from "react";
-import { heapSort }         from "../sorting-algorithms/heapSort";
-import { getRandomInteger, deepCopyArray, sleep, colorNodes, colorBars } from "../utils";
-import { mergeSort }        from "../sorting-algorithms/mergeSort";
-import { quickSort }        from "../sorting-algorithms/quickSort";
-import { selectionSort }    from "../sorting-algorithms/selectionSort";
+import React                          from "react";
+import { 
+    getRandomInteger, 
+    deepCopyArray, 
+    sleep, 
+    colorNodes, 
+    colorBars,
+    addAdditionalBarsHoverEffects,
+    setDisableProperty }              from "../utils";
+import { heapSort }                   from "../sorting-algorithms/heapSort";
+import { mergeSort }                  from "../sorting-algorithms/mergeSort";
+import { quickSort }                  from "../sorting-algorithms/quickSort";
+import { selectionSort }              from "../sorting-algorithms/selectionSort";
 
 const SPEED_CONSTANT = 1000;     // lower means faster animations
 const MAX_ARRAY_SIZE = 200;
@@ -11,10 +18,10 @@ const MIN_ARRAY_SIZE = 5;
 const SIZE_INCREMENT = 15;
 
 const colors = {
-    SORTED_COLOR: 'rgba(28, 129, 21, 0.678)',
+    SORTED_COLOR:     'rgba(28, 129, 21, 0.678)',
     DEFAULT_UNSORTED: 'rgba(185, 127, 80, 0.568)',
-    ACTIVE_COLOR: 'rgb(179, 86, 11)',
-    MIN_INDEX_COLOR: 'rgb(235, 204, 9, 0.82)'
+    ACTIVE_COLOR:     'rgb(179, 86, 11)',
+    MIN_INDEX_COLOR:  'rgb(235, 204, 9, 0.82)'
 };
 
 const algorithms = {
@@ -30,21 +37,21 @@ class Visualizer extends React.Component {
         super(props);
         this.state = {
             array: [],
-            arraySize: 30,
+            arraySize: 40,
             usedSortingAlgorithm: null
         };
     }
 
-    componentDidMount = () => {
-        this.resetArray();
-    }
+    componentDidMount = () => { this.resetArray(() => addAdditionalBarsHoverEffects()); }
+
+    componentDidUpdate = () => { addAdditionalBarsHoverEffects(); }
 
     // create a new random array
     resetArray = (callback) => {
         let newArraySize = this.state.arraySize;
         let newArray = [];
         for (let i=0; i < newArraySize; i++) {
-            let value = getRandomInteger(5, 200);
+            let value = getRandomInteger(5, 160);
             newArray.push(value);
         }
 
@@ -53,15 +60,9 @@ class Visualizer extends React.Component {
         else this.setState({array: newArray, arraySize: newArray.length, usedSortingAlgorithm: null});
     }
 
-    setDisableProperty = (selector) => {
-        let nodes = document.querySelectorAll(selector);
-        for (const node of nodes) 
-            node.setAttribute('disabled', true);
-    }
-
     // sort the current array (stored in the state) by using the algorithm passed by parameter
     sort = (algorithm) => {
-        this.setState({usedSortingAlgorithm: null}, () => this.setDisableProperty('.sort-button, .reset-button, .size-button'));
+        this.setState({usedSortingAlgorithm: null}, () => setDisableProperty('.sort-button, .reset-button, .size-button'));
 
         algorithm = algorithm.trim().toLowerCase();
 
@@ -76,8 +77,11 @@ class Visualizer extends React.Component {
     // show sorting animations
     showSorting = async (history, algorithm) => {
         for (const frame of history){
-            await sleep(SPEED_CONSTANT/this.state.arraySize);
-            this.setState({array: frame.values}, () => {colorBars(frame.animations); this.setDisableProperty('button');});
+            await sleep(SPEED_CONSTANT/this.state.arraySize); // slow down the animations
+            this.setState({array: frame.values}, () => {
+                colorBars(frame.animations); 
+                setDisableProperty('button');
+            });
         }    
 
         // array sorted shown
@@ -96,12 +100,12 @@ class Visualizer extends React.Component {
 
         if (newArraySize === MAX_ARRAY_SIZE){
             this.setState({arraySize: newArraySize}, () => {
-                this.resetArray(() => this.setDisableProperty('button.plus-size-button'));
+                this.resetArray(() => setDisableProperty('button.plus-size-button'));
             });
             
         } else if (newArraySize === MIN_ARRAY_SIZE){
             this.setState({arraySize: newArraySize}, () => {
-                this.resetArray(() => this.setDisableProperty('button.minus-size-button'));
+                this.resetArray(() => setDisableProperty('button.minus-size-button'));
             });
             
         } else this.setState({arraySize: newArraySize}, () => this.resetArray());
@@ -121,6 +125,7 @@ class Visualizer extends React.Component {
                 <button className='custom-button sort-button'    onClick={() => this.sort('heapsort')}> HeapSort </button>
                 </div>
 
+
                 <div id='array-changer-container'>
                 <div id='size-changer-container'>              
                 <button className='custom-button size-button minus-size-button' name='minus-button' onClick={this.handleSizeChange}> - </button>
@@ -137,9 +142,10 @@ class Visualizer extends React.Component {
         let VisualizerContainer = () => {
             let arrayBars = this.state.array.map((value, index) => {
                 return (
-                    <div className='array-bar' id={`array-bar-${index}`} key={index}
-                    style={{height:`${value*2}px`}}
-                    ></div>
+                    <div className='array-bar array-bar-hover-effect' id={`array-bar-${index}`} key={index}
+                    style={{height:`${value*3}px`}}>
+                    <div className='number'> {value} </div>
+                    </div>
                 );
             });
 
@@ -148,9 +154,7 @@ class Visualizer extends React.Component {
             return (
                 <>
                 <div id='sorting-info'> {sortingInfo} </div>
-                <div id='visualizer-container'>
-                {arrayBars}
-                </div>
+                <div id='visualizer-container'> {arrayBars} </div>
                 </>
             );
         }

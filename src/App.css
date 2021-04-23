@@ -62,7 +62,7 @@ div#wrapper {
     align-items: baseline;
     max-height: 80vh;
     min-height: 30vh;
-    margin: 60px 200px;
+    margin: 60px 180px;
 }
 
 div#sorting-info {
@@ -79,7 +79,17 @@ div#sorting-info {
     justify-content: center;
 }
 
-.array-bar:hover {
+.number {
+    display: none;
+    align-self: flex-end;
+    /*
+    visibility: hidden;
+    align-self: flex-end;
+    */
+}
+
+
+.array-bar-hover-effect:hover {
     background-color: var(--dark-orange);
     box-shadow: 0 0 15px var(--dark-grey);
 }

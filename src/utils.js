@@ -57,3 +57,25 @@ export function newAnimationsArray(elements, size, finals) {
 
     return animArray;
 }
+
+
+export function addAdditionalBarsHoverEffects() {
+    let arrayBar = document.querySelectorAll('.array-bar');
+    arrayBar.forEach( (bar) => {
+        let number = bar.childNodes[0];
+        
+        bar.addEventListener('mouseenter', () => {
+            number.style.display = 'inline-block';
+        });
+
+        bar.addEventListener('mouseleave', () => {
+            number.style.display = 'none';
+        });
+    });
+}
+
+export function setDisableProperty(selector) {
+    let nodes = document.querySelectorAll(selector);
+    for (const node of nodes) 
+        node.setAttribute('disabled', true);
+}
