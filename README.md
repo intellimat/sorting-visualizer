@@ -1,3 +1,18 @@
+This project has been deployed on Heroku, therefore you can access it by visiting https://sorting-arrays.herokuapp.com/ (wait a few seconds after clicking, heroku server needs to start up). <br />
+The purpose of this project is to highlight how different sorting algorithms work.
+#### Sorting algorithms
+- HeapSort
+- QuickSort (3-way partitioning)
+- MergeSort
+- SelectionSort
+#### Stack
+- React
+- Vanilla JS
+- HTML
+- CSS
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
