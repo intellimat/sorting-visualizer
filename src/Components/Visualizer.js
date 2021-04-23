@@ -6,16 +6,18 @@ import {
     colorNodes, 
     colorBars,
     addAdditionalBarsHoverEffects,
-    setDisableProperty }              from "../utils";
+    setDisableProperty}               from "../utils";
 import { heapSort }                   from "../sorting-algorithms/heapSort";
 import { mergeSort }                  from "../sorting-algorithms/mergeSort";
 import { quickSort }                  from "../sorting-algorithms/quickSort";
 import { selectionSort }              from "../sorting-algorithms/selectionSort";
 
 const SPEED_CONSTANT = 1000;     // lower means faster animations
-const MAX_ARRAY_SIZE = 200;
+const MAX_ARRAY_SIZE = 170;
 const MIN_ARRAY_SIZE = 5;
 const SIZE_INCREMENT = 15;
+const MAX_INTEGER    = 160;
+const MIN_INTEGER    = 5;
 
 const colors = {
     SORTED_COLOR:     'rgba(28, 129, 21, 0.678)',
@@ -37,7 +39,7 @@ class Visualizer extends React.Component {
         super(props);
         this.state = {
             array: [],
-            arraySize: 40,
+            arraySize: 60,
             usedSortingAlgorithm: null
         };
     }
@@ -50,8 +52,9 @@ class Visualizer extends React.Component {
     resetArray = (callback) => {
         let newArraySize = this.state.arraySize;
         let newArray = [];
+        
         for (let i=0; i < newArraySize; i++) {
-            let value = getRandomInteger(5, 160);
+            let value = getRandomInteger(MIN_INTEGER, MAX_INTEGER);
             newArray.push(value);
         }
 
@@ -143,11 +146,11 @@ class Visualizer extends React.Component {
             let arrayBars = this.state.array.map((value, index) => {
                 return (
                     <div className='array-bar array-bar-hover-effect' id={`array-bar-${index}`} key={index}
-                    style={{height:`${value*3}px`}}>
+                    style={{height:`${(value/MAX_INTEGER)*60}vh`}}>
                     <div className='number'> {value} </div>
                     </div>
                 );
-            });
+            }); 
 
             let sortingInfo = (this.state.usedSortingAlgorithm != null ) ? `Array sorted by ${this.state.usedSortingAlgorithm} algorithm!` : '';
 
