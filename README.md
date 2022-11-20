@@ -1,4 +1,4 @@
-This project has been deployed on Heroku, therefore you can access it by visiting https://sorting-arrays.herokuapp.com/ (wait a few seconds after clicking, heroku server needs to start up). <br />
+This project has been deployed on Heroku, therefore you can access it by visiting https://sorting-visualizer-production.up.railway.app/ (please wait a few seconds after clicking). <br />
 Image of the dockerized app can be downloaded from the official Docker Hub by pulling _intellimat/sorting-visualizer:sorting-visualizer_ <br />
 The purpose of this project is to highlight how different sorting algorithms work.
 
